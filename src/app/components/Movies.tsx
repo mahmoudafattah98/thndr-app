@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Spin, Carousel, Card } from "antd";
 import { waitForDebugger } from "inspector";
 import { AudioOutlined } from "@ant-design/icons";
-import { Input, Space } from "antd";
+import { Input, Space, Empty } from "antd";
 import type { GetProps } from "antd";
 
 type SearchProps = GetProps<typeof Input.Search>;
@@ -45,8 +45,6 @@ export default function Movies() {
     }, 2000);
   }
 
-  useEffect(() => {}, []);
-
   type movieType = "movie" | "series" | "episode";
   type info = {
     Search: Array<movie>;
@@ -61,37 +59,30 @@ export default function Movies() {
     Poster: string;
   };
 
-  function renderMovies() {
-    return info.Search.map((movie: movie, index: number) => {
-      return (
-        // <div key={index}>
-        // <h3>{movie.Title} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {movie.Year}</h3>
-        // <img src={movie.Poster} alt={movie.Title} /><br />
-        // <p>{movie.Type}</p>
-        // <br />
-        //     </div>
-        <>
-          <Card
-            hoverable
-            style={{ width: 240 }}
-            cover={<img alt="example" src={movie.Poster} />}
-          >
-            <Meta title={movie.Title} description={movie.Year} />
-          </Card>
-          <br />
-        </>
-      );
-    });
-  }
-
-  function renderCarousel() {
-    return <></>;
+  function renderMovies(empty?: boolean) {
+    if (info.Response === "False" || empty) {
+      return <Empty />;
+    } else {
+      return info.Search.map((movie: movie, index: number) => {
+        return (
+          <>
+            <Card
+              hoverable
+              style={{ width: 240 }}
+              cover={<img alt="example" src={movie.Poster} />}
+            >
+              <Meta title={movie.Title} description={movie.Year} />
+            </Card>
+            <br />
+          </>
+        );
+      });
+    }
   }
 
   function onSearch(value: string) {
     if (value == "") {
-      setInfo(DEFAULT_STATE);
-      return;
+      renderMovies(true);
     }
     getMovies(value);
   }
