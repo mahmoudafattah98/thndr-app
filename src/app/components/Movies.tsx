@@ -4,6 +4,7 @@ import { waitForDebugger } from "inspector";
 import { AudioOutlined } from "@ant-design/icons";
 import { Input, Space, Empty } from "antd";
 import type { GetProps } from "antd";
+import { useQuery } from "@tanstack/react-query";
 
 type SearchProps = GetProps<typeof Input.Search>;
 
@@ -24,46 +25,42 @@ const DEFAULT_STATE = {
   Response: "",
 };
 
+type movieType = "movie" | "series" | "episode";
+type info = {
+  Search: Array<movie>;
+  totalResults: number;
+  Response: String;
+};
+type movie = {
+  Title: string;
+  Year: number;
+  imdbId: string;
+  Type: movieType;
+  Poster: string;
+};
+
+// function to fetch data
+function fetchMovies(searchTerm: string) {
+  return fetch(`https://www.omdbapi.com/?apikey=8bdf708a&s=${searchTerm}`).then(
+    (res) => {
+      return res.json();
+    }
+  );
+}
+
 export default function Movies() {
-  const [info, setInfo]: [info, any] = useState({
-    Search: [],
-    totalResults: 0,
-    Response: "",
+  const [searchTerm, setSearchTerm] = useState("");
+  const { isLoading, data } = useQuery({
+    queryKey: [`movies-data-${searchTerm}`],
+    staleTime: 1000 * 60,
+    queryFn: () => fetchMovies(searchTerm),
   });
-  const [loading, setLoading]: [boolean, any] = useState(false);
-  const [search, setSearch] = useState("");
-
-  async function getMovies(searchKey: string) {
-    setLoading(true);
-    const response = await fetch(
-      `https://www.omdbapi.com/?apikey=8bdf708a&s=${searchKey}` // this is called a string literal
-    );
-    const data = await response.json();
-    setInfo(data);
-    setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-  }
-
-  type movieType = "movie" | "series" | "episode";
-  type info = {
-    Search: Array<movie>;
-    totalResults: number;
-    Response: String;
-  };
-  type movie = {
-    Title: string;
-    Year: number;
-    imdbId: string;
-    Type: movieType;
-    Poster: string;
-  };
 
   function renderMovies(empty?: boolean) {
-    if (info.Response === "False" || empty) {
+    if (data?.Response === "False" || empty) {
       return <Empty />;
     } else {
-      return info.Search.map((movie: movie, index: number) => {
+      return data?.Search.map((movie: movie, index: number) => {
         return (
           <>
             <Card
@@ -80,13 +77,6 @@ export default function Movies() {
     }
   }
 
-  function onSearch(value: string) {
-    if (value == "") {
-      renderMovies(true);
-    }
-    getMovies(value);
-  }
-
   return (
     <>
       <Search
@@ -94,10 +84,10 @@ export default function Movies() {
         allowClear
         enterButton
         size="large"
-        onSearch={onSearch}
+        onChange={(e) => setSearchTerm(e.target.value)}
       />
       <br />
-      {loading ? <Spin /> : renderMovies()}
+      {isLoading ? <Spin /> : renderMovies()}
     </>
   );
 }
