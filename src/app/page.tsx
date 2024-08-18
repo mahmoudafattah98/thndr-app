@@ -1,18 +1,17 @@
-'use client';
-import React from 'react';
+"use client";
+import React from "react";
 import Form from "./components/Form";
-import Movies from "./components/Movies"
-
+import Movies from "./components/Movies";
+import styles from "./page.module.css";
 export default function Home() {
-
   const handleSubmit = () => {
     console.log("Hi");
   };
 
   return (
-    <main>
+    <main className={styles.main}>
       {/* <Form onSubmit={handleSubmit} /> */}
-      <Movies/>
+      <Movies />
     </main>
   );
 }

@@ -28,7 +28,7 @@ export default function Movies() {
     setInfo(data);
     setTimeout(() => {
       setLoading(false);
-    }, 3000);
+    }, 2000);
   }
 
   useEffect(() => {
