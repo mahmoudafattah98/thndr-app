@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { Spin, Carousel, Card } from "antd";
 import { waitForDebugger } from "inspector";
+import { AudioOutlined } from "@ant-design/icons";
+import { Input, Space } from "antd";
+import type { GetProps } from "antd";
+
+type SearchProps = GetProps<typeof Input.Search>;
+
+const { Search } = Input;
 const { Meta } = Card;
 const contentStyle: React.CSSProperties = {
   margin: 0,
@@ -11,6 +18,12 @@ const contentStyle: React.CSSProperties = {
   background: "#364d79",
 };
 
+const DEFAULT_STATE = {
+  Search: [],
+  totalResults: 0,
+  Response: "",
+};
+
 export default function Movies() {
   const [info, setInfo]: [info, any] = useState({
     Search: [],
@@ -18,11 +31,12 @@ export default function Movies() {
     Response: "",
   });
   const [loading, setLoading]: [boolean, any] = useState(false);
+  const [search, setSearch] = useState("");
 
-  async function getMovies() {
+  async function getMovies(searchKey: string) {
     setLoading(true);
     const response = await fetch(
-      "https://www.omdbapi.com/?apikey=8bdf708a&s=hangover"
+      `https://www.omdbapi.com/?apikey=8bdf708a&s=${searchKey}` // this is called a string literal
     );
     const data = await response.json();
     setInfo(data);
@@ -31,9 +45,7 @@ export default function Movies() {
     }, 2000);
   }
 
-  useEffect(() => {
-    getMovies();
-  }, []);
+  useEffect(() => {}, []);
 
   type movieType = "movie" | "series" | "episode";
   type info = {
@@ -66,6 +78,7 @@ export default function Movies() {
           >
             <Meta title={movie.Title} description={movie.Year} />
           </Card>
+          <br />
         </>
       );
     });
@@ -75,5 +88,25 @@ export default function Movies() {
     return <></>;
   }
 
-  return <>{loading ? <Spin /> : renderMovies()}</>;
+  function onSearch(value: string) {
+    if (value == "") {
+      setInfo(DEFAULT_STATE);
+      return;
+    }
+    getMovies(value);
+  }
+
+  return (
+    <>
+      <Search
+        placeholder="input search text"
+        allowClear
+        enterButton
+        size="large"
+        onSearch={onSearch}
+      />
+      <br />
+      {loading ? <Spin /> : renderMovies()}
+    </>
+  );
 }
