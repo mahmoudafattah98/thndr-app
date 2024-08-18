@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import Form from "./components/Form";
+import Movies from "./components/Movies"
 
 export default function Home() {
 
@@ -10,7 +11,8 @@ export default function Home() {
 
   return (
     <main>
-      <Form onSubmit={handleSubmit} />
+      {/* <Form onSubmit={handleSubmit} /> */}
+      <Movies/>
     </main>
   );
 }
